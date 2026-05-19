@@ -1,0 +1,162 @@
+// --- Constants — control the shape of the game ---
+const WORD_LENGTH = 5;
+const MAX_GUESSES = 6;
+
+// --- Word list (100 common 5-letter words) ---
+const WORDS = [
+  "APPLE", "BAKER", "CRANE", "DREAM", "EAGLE", "FRESH", "GHOST", "HEART", "IMAGE", "JUICE",
+  "KNIFE", "LEMON", "MAGIC", "NIGHT", "OCEAN", "PIANO", "QUIET", "RIVER", "SHARE", "TIGER",
+  "YOUTH", "ZEBRA", "ANGEL", "BREAD", "CLOUD", "DANCE", "EARTH", "FRUIT", "GRAPE", "HAPPY",
+  "JOKER", "LIGHT", "MUSIC", "NOBLE", "OLIVE", "PEACE", "QUEEN", "RADIO", "SMILE", "TRUST",
+  "UNITY", "VIDEO", "WHALE", "YOUNG", "BLINK", "CHEER", "DRAFT", "ENJOY", "FEAST", "GIANT",
+  "HABIT", "IVORY", "JUMBO", "LATER", "MAJOR", "NORTH", "OFFER", "PRINT", "QUICK", "ROBIN",
+  "STORM", "TRUCK", "UPPER", "VOWEL", "WINGS", "ALERT", "BRAVE", "CRISP", "DAILY", "EMPTY",
+  "FANCY", "GLOOM", "HONEY", "IDEAL", "JOLLY", "LOYAL", "MANGO", "NOVEL", "OPERA", "PEACH",
+  "ROYAL", "SHINE", "TOWER", "URBAN", "VAULT", "WORTH", "ABOUT", "AGENT", "BLACK", "CANDY",
+  "DRAMA", "EVENT", "FAITH", "GUARD", "HOUSE", "JUDGE", "LIVER", "MONEY", "NURSE", "OFTEN",
+];
+
+// --- Pick a random target word for this game ---
+let targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+
+// --- Game state ---
+let currentRow = 0;
+let currentCol = 0;
+let gameOver = false;
+
+console.log("Target word (for debugging):", targetWord);
+
+// --- Helper: grab the tile at a specific row and column ---
+function getTile(row, col) {
+  const rows = document.querySelectorAll('.row');
+  return rows[row].children[col];
+}
+
+// --- Type a letter into the current tile ---
+function typeLetter(letter) {
+  if (currentCol >= WORD_LENGTH) return;
+  const tile = getTile(currentRow, currentCol);
+  tile.textContent = letter;
+  tile.classList.add('filled');
+  currentCol++;
+}
+
+// --- Erase the previous tile in the current row ---
+function deleteLetter() {
+  if (currentCol === 0) return;
+  currentCol--;
+  const tile = getTile(currentRow, currentCol);
+  tile.textContent = '';
+  tile.classList.remove('filled');
+}
+
+// --- Submit the current row's guess ---
+function submitGuess() {
+  if (currentCol < WORD_LENGTH) {
+    console.log("Not enough letters yet");
+    return;
+  }
+
+  let guess = '';
+  for (let i = 0; i < WORD_LENGTH; i++) {
+    guess += getTile(currentRow, i).textContent;
+  }
+
+  const status = evaluateGuess(guess, targetWord);
+
+  for (let i = 0; i < WORD_LENGTH; i++) {
+    const tile = getTile(currentRow, i);
+    tile.classList.remove('filled');
+    tile.classList.add(status[i]);
+  }
+
+  // Check for win
+  if (guess === targetWord) {
+    endGame(true);
+    return;
+  }
+
+  // Move to the next row
+  currentRow++;
+  currentCol = 0;
+
+  // Check for lose
+  if (currentRow >= MAX_GUESSES) {
+    endGame(false);
+  }
+}
+
+// --- The two-pass algorithm: figure out green/yellow/gray for each letter ---
+function evaluateGuess(guess, target) {
+  const status = new Array(WORD_LENGTH).fill('absent');
+  const targetLetters = target.split('');
+
+  // Pass 1: greens
+  for (let i = 0; i < WORD_LENGTH; i++) {
+    if (guess[i] === target[i]) {
+      status[i] = 'correct';
+      targetLetters[i] = null;
+    }
+  }
+
+  // Pass 2: yellows
+  for (let i = 0; i < WORD_LENGTH; i++) {
+    if (status[i] === 'correct') continue;
+    const idx = targetLetters.indexOf(guess[i]);
+    if (idx !== -1) {
+      status[i] = 'present';
+      targetLetters[idx] = null;
+    }
+  }
+
+  return status;
+}
+
+// --- Game over: show the message and reveal Play Again ---
+function endGame(won) {
+  gameOver = true;
+  const messageEl = document.getElementById('message');
+  if (won) {
+    messageEl.textContent = "You got it! The word was " + targetWord;
+  } else {
+    messageEl.textContent = "Out of guesses. The word was " + targetWord;
+  }
+  document.getElementById('play-again').style.display = 'inline-block';
+}
+
+// --- Reset everything for a new game ---
+function resetGame() {
+  currentRow = 0;
+  currentCol = 0;
+  gameOver = false;
+
+  targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+  console.log("Target word (for debugging):", targetWord);
+
+  const tiles = document.querySelectorAll('.tile');
+  for (let i = 0; i < tiles.length; i++) {
+    tiles[i].textContent = '';
+    tiles[i].classList.remove('filled', 'correct', 'present', 'absent');
+  }
+
+  document.getElementById('message').textContent = '';
+  document.getElementById('play-again').style.display = 'none';
+}
+
+// --- Listen for every key press on the page ---
+document.addEventListener('keydown', function(event) {
+  if (gameOver) return;
+
+  const key = event.key;
+
+  if (key === 'Enter') {
+    submitGuess();
+  } else if (key === 'Backspace') {
+    deleteLetter();
+  } else if (key.length === 1 && /^[A-Z]$/i.test(key)) {
+    typeLetter(key.toUpperCase());
+  }
+});
+
+// --- Wire up the Play Again button ---
+document.getElementById('play-again').addEventListener('click', resetGame);

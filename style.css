@@ -1,0 +1,99 @@
+body {
+  background-color: #121213;
+  color: #FFFFFF;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+header {
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  border-bottom: 1px solid #3A3A3C;
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+}
+
+header h1 {
+  font-size: 36px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+/* --- Board layout --- */
+#board {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.row {
+  display: flex;
+  gap: 6px;
+}
+
+.tile {
+  width: 60px;
+  height: 60px;
+  border: 2px solid #3A3A3C;
+  background-color: #121213;
+  color: #FFFFFF;
+  font-size: 28px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tile.filled {
+  border-color: #565758;
+}
+
+.tile.correct {
+  background-color: #538D4E;
+  border-color: #538D4E;
+}
+
+.tile.present {
+  background-color: #B59F3B;
+  border-color: #B59F3B;
+}
+
+.tile.absent {
+  background-color: #3A3A3C;
+  border-color: #3A3A3C;
+}
+
+/* --- Message area --- */
+#message {
+  font-size: 18px;
+  font-weight: 500;
+  margin-top: 16px;
+  text-align: center;
+  min-height: 24px;
+}
+
+#play-again {
+  display: none;            
+  margin-top: 16px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  background-color: #538D4E;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#play-again:hover {
+  background-color: #4A7D45;
+}
